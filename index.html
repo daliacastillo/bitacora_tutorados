@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitácora de Tutorados</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#1c2433;--muted:#5d6779;--line:#d8deea;--pri:#1f3b73;--pri2:#2c56a6;--acc:#c79a2b;--ok:#1d7a46;--err:#b42318}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--pri);color:#fff;padding:28px 16px 34px;border-bottom:5px solid var(--acc)}
+header .w,main{max-width:820px;margin:0 auto}
+header small{letter-spacing:.08em;text-transform:uppercase;opacity:.8;font-size:12px}
+header h1{margin:4px 0 2px;font-size:26px}
+header p{margin:0;opacity:.9}
+main{padding:0 16px 48px;margin-top:-18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.card h2{margin:0 0 4px;font-size:17px;color:var(--pri)}
+.card .hint{margin:0 0 14px;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+label{display:block;font-weight:600;font-size:14px;margin-bottom:5px}
+label .req{color:var(--err)}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri2);outline-offset:0;border-color:var(--pri2)}
+textarea{min-height:90px;resize:vertical}
+.total{display:flex;align-items:center;gap:14px;margin-top:14px;padding:12px 14px;background:#eef2fb;border-radius:8px}
+.total b{font-size:22px;color:var(--pri)}
+.bar{flex:1;height:10px;background:#d6deef;border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .3s}
+.hidden{display:none}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{border:0;border-radius:8px;padding:12px 22px;font:600 16px/1 inherit;cursor:pointer}
+.primary{background:var(--pri);color:#fff}.primary:hover{background:var(--pri2)}
+.primary:disabled{opacity:.6;cursor:wait}
+.ghost{background:transparent;color:var(--pri);border:1px solid var(--line)}
+.msg{padding:12px 14px;border-radius:8px;margin-top:12px;font-size:15px}
+.msg.ok{background:#e7f6ec;color:var(--ok)}.msg.err{background:#fdecea;color:var(--err)}
+footer{text-align:center;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="w">
+  <small>Universidad Autónoma de Nayarit · Licenciatura en Matemáticas</small>
+  <h1>Bitácora de Tutorados</h1>
+  <p>Tutoría agosto – diciembre 2026</p>
+</div></header>
+
+<main>
+<form id="f" novalidate>
+  <div class="card">
+    <h2>1. Datos del estudiante</h2>
+    <p class="hint">Selecciona tu nombre o escríbelo si no aparece.</p>
+    <div class="grid">
+      <div>
+        <label for="estudiante">Estudiante <span class="req">*</span></label>
+        <select id="estudiante" name="Estudiante" required>
+          <option value="">— Selecciona —</option>
+          <option>Gabriel Castro Becerra</option>
+          <option>Alexandra Rodríguez Correa</option>
+          <option>Sergio Bogarín Aquino</option>
+          <option value="__otro">Otro (escribir nombre)</option>
+        </select>
+      </div>
+      <div id="otroBox" class="hidden">
+        <label for="otro">Nombre completo <span class="req">*</span></label>
+        <input id="otro" type="text" placeholder="Nombre y apellidos">
+      </div>
+      <div>
+        <label for="matricula">Matrícula</label>
+        <input id="matricula" name="Matrícula" type="text" inputmode="numeric">
+      </div>
+      <div>
+        <label for="correo">Correo del estudiante</label>
+        <input id="correo" name="Correo del estudiante" type="email" placeholder="para enviarte copia">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>2. Avance académico</h2>
+    <p class="hint">Registra los créditos acreditados a la fecha.</p>
+    <div class="grid">
+      <div>
+        <label for="avance">Avance de créditos <span class="req">*</span></label>
+        <input id="avance" name="Avance de créditos" type="number" min="0" step="1" required>
+      </div>
+    </div>
+    <h2 style="margin-top:18px">Optativas libres (meta: 30 créditos)</h2>
+    <div class="grid" style="margin-top:10px">
+      <div><label for="r1">Rubro 1</label><input id="r1" name="Rubro 1" type="number" min="0" step="1" value="0"></div>
+      <div><label for="r2">Rubro 2</label><input id="r2" name="Rubro 2" type="number" min="0" step="1" value="0"></div>
+      <div><label for="r3">Rubro 3</label><input id="r3" name="Rubro 3" type="number" min="0" step="1" value="0"></div>
+    </div>
+    <div class="total">
+      <span>Total optativas libres:</span><b id="tot">0</b><span>/ 30</span>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. Requisitos de egreso</h2>
+    <div class="grid">
+      <div>
+        <label for="ss">Servicio social <span class="req">*</span></label>
+        <select id="ss" name="Servicio social" required>
+          <option value="">— Selecciona —</option>
+          <option>No iniciado</option><option>Realizando</option><option>Realizado</option><option>Liberado</option>
+        </select>
+      </div>
+      <div>
+        <label for="pp">Prácticas profesionales <span class="req">*</span></label>
+        <select id="pp" name="Prácticas profesionales" required>
+          <option value="">— Selecciona —</option>
+          <option>No iniciado</option><option>Realizando</option><option>Realizado</option><option>Liberado</option>
+        </select>
+      </div>
+      <div>
+        <label for="exacri">Requisito de titulación EXACRI <span class="req">*</span></label>
+        <select id="exacri" name="Requisito de titulación EXACRI" required>
+          <option value="">— Selecciona —</option>
+          <option>Pendiente</option><option>Programado</option><option>Realizado</option>
+        </select>
+      </div>
+      <div>
+        <label for="opcion">Posible opción de titulación <span class="req">*</span></label>
+        <select id="opcion" name="Posible opción de titulación" required>
+          <option value="">— Selecciona —</option>
+          <option>Promedio</option><option>Tesis</option><option>Tesina</option>
+          <option>Examen general de egreso (EGEL)</option><option>Memoria de experiencia profesional</option>
+          <option>Aún no lo decido</option><option value="__otra">Otra</option>
+        </select>
+      </div>
+      <div id="otraBox" class="hidden">
+        <label for="otra">¿Cuál?</label>
+        <input id="otra" type="text">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>4. Observaciones</h2>
+    <label for="obs" class="hidden">Observaciones</label>
+    <textarea id="obs" name="Observaciones" placeholder="Dificultades, necesidades de apoyo, comentarios para la tutora…"></textarea>
+  </div>
+
+  <div class="card">
+    <div class="actions">
+      <button type="submit" class="primary" id="send">Enviar a la tutora</button>
+      <button type="reset" class="ghost">Limpiar</button>
+    </div>
+    <div id="msg" class="msg hidden" role="status"></div>
+  </div>
+</form>
+<footer>Los datos se envían por correo a la tutora responsable.</footer>
+</main>
+
+<script>
+// ===== Configuración: correo que recibe las respuestas =====
+const DESTINO = "daliacastillo@gmail.com";
+// ===========================================================
+const $ = id => document.getElementById(id);
+const f = $("f");
+
+function total(){
+  const t = ["r1","r2","r3"].reduce((s,id)=>s+(parseFloat($(id).value)||0),0);
+  $("tot").textContent = t;
+  $("bar").style.width = Math.min(100,t/30*100)+"%";
+  return t;
+}
+["r1","r2","r3"].forEach(id=>$(id).addEventListener("input",total));
+
+$("estudiante").addEventListener("change",e=>$("otroBox").classList.toggle("hidden",e.target.value!=="__otro"));
+$("opcion").addEventListener("change",e=>$("otraBox").classList.toggle("hidden",e.target.value!=="__otra"));
+f.addEventListener("reset",()=>setTimeout(()=>{total();$("otroBox").classList.add("hidden");$("otraBox").classList.add("hidden");$("msg").classList.add("hidden")},0));
+
+function show(type,text){const m=$("msg");m.className="msg "+type;m.textContent=text}
+
+function datos(){
+  let est=$("estudiante").value; if(est==="__otro") est=$("otro").value.trim();
+  let op=$("opcion").value; if(op==="__otra") op="Otra: "+$("otra").value.trim();
+  return {
+    "Periodo":"Tutoría agosto-diciembre 2026",
+    "Estudiante":est,
+    "Matrícula":$("matricula").value.trim(),
+    "Correo del estudiante":$("correo").value.trim(),
+    "Avance de créditos":$("avance").value,
+    "Rubro 1":$("r1").value||"0","Rubro 2":$("r2").value||"0","Rubro 3":$("r3").value||"0",
+    "Total optativas libres (30)":String(total()),
+    "Servicio social":$("ss").value,
+    "Prácticas profesionales":$("pp").value,
+    "Requisito de titulación EXACRI":$("exacri").value,
+    "Posible opción de titulación":op,
+    "Observaciones":$("obs").value.trim(),
+    "Fecha de envío":new Date().toLocaleString("es-MX")
+  };
+}
+
+function validar(d){
+  const falt=[];
+  if(!d["Estudiante"]) falt.push("Estudiante");
+  if(d["Avance de créditos"]==="") falt.push("Avance de créditos");
+  ["Servicio social","Prácticas profesionales","Requisito de titulación EXACRI"].forEach(k=>{if(!d[k])falt.push(k)});
+  if(!$("opcion").value) falt.push("Posible opción de titulación");
+  return falt;
+}
+
+f.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const d=datos(), falt=validar(d);
+  if(falt.length){show("err","Falta completar: "+falt.join(", ")+".");return}
+  const btn=$("send"); btn.disabled=true; btn.textContent="Enviando…";
+  const payload={...d,_subject:"Bitácora de tutorados – "+d["Estudiante"],_template:"table",_captcha:"false"};
+  if(d["Correo del estudiante"]) payload._replyto=d["Correo del estudiante"];
+  try{
+    const r=await fetch("https://formsubmit.co/ajax/"+DESTINO,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(payload)});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||String(j.success)!=="true") throw new Error(j.message||"Error "+r.status);
+    show("ok","¡Listo! Tus datos se enviaron correctamente a la tutora. Gracias, "+d["Estudiante"].split(" ")[0]+".");
+    f.reset();
+  }catch(err){
+    // Respaldo: abrir el programa de correo con los datos ya escritos
+    const cuerpo=Object.entries(d).map(([k,v])=>k+": "+(v||"—")).join("\n");
+    show("err","No se pudo enviar automáticamente. Se abrirá tu correo con los datos listos: solo presiona Enviar.");
+    location.href="mailto:"+DESTINO+"?subject="+encodeURIComponent(payload._subject)+"&body="+encodeURIComponent(cuerpo);
+  }finally{btn.disabled=false;btn.textContent="Enviar a la tutora"}
+});
+total();
+</script>
+</body>
+</html>
